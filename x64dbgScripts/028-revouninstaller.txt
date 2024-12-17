@@ -1,0 +1,140 @@
+//-- 028-revouninstaller (64-bit)
+//-- first run will crack it and also patch registration name in rsrc section (patch 3)
+//-- and also patch to hide splash screen at startup (patch 0)
+//-- after opening About box, the second run will patch registration name in heap (via patch 4)
+//-- and also patch to null out string "Remaining Days:" (via patch 5)
+//-- by crackinglessons.com Aug 24, 2024
+
+ClearLog
+bpc
+
+
+//---Get base address of main module for aob scan for patches 1 to 3
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+//---Get PEB address (because it contains the heap) for aob scan for patches 4 and 5
+$pebaddr = peb()
+log "pebaddr: {$pebaddr}"
+
+
+//------------------ PATCH 0: Hide Opening Splash Screen --------------------
+bp SetWindowPos
+run
+// 0x0080 == SWP_HIDEWINDOW, the 7th param to SetWindowPos
+mov [rsp+38], 0x0080
+bpc
+
+
+//-------------------------PATCH 1: NOP at 0000000140255070 -------------------------
+findallmem $baseaddr, "74 0B 3D FF 3F 00 00 0F 85 AA 14 00 00 33 D2"
+log "result: {$result}"
+cmp $result, 1
+jl patch2
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, 90, 2
+
+//--------------------------PATCH 2: JMP at 0000000140255077 --------------------
+patch2:
+findallmem $baseaddr, "0F 85 AA 14 00 00 33 D2 49 8B 8D 88 02 00 00"
+log "result: {$result}"
+cmp $result, 1
+jl patch3
+$addr = ref.addr(0)
+log "{$addr}"
+//--E9 AB 14 00 00 90
+Fill $addr,   E9, 1
+Fill $addr+1, AB, 1
+Fill $addr+2, 14, 1
+Fill $addr+3, 00, 2
+Fill $addr+5, 90, 1
+
+//-------------------PATCH 3 to patch registration name to "Revo User"  in the rsrc section----------------------
+patch3:
+findallmem $baseaddr, "55 00 6E 00 72 00 65 00 67 00 69 00 73 00 74 00 65 00 72 00 65 00 64 00 20 00 56 00 65 00 72 00 73 00 69 00 6F 00 6E 00"
+log "result: {$result}"
+cmp $result, 1
+jl patch4
+$addr = ref.addr(0)
+log "{$addr}"
+//--52 00 65 00 76 00 6F 00 20 00 55 00 73 00 65 00 72 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Fill $addr,   52, 1
+Fill $addr+1, 00, 1
+Fill $addr+2, 65, 1
+Fill $addr+3, 00, 1
+Fill $addr+4, 76, 1
+Fill $addr+5, 00, 1
+Fill $addr+6, 6F, 1
+Fill $addr+7, 00, 1
+Fill $addr+8, 20, 1
+Fill $addr+9, 00, 1
+Fill $addr+A, 55, 1
+Fill $addr+B, 00, 1
+Fill $addr+C, 73, 1
+Fill $addr+D, 00, 1
+Fill $addr+E, 65, 1
+Fill $addr+F, 00, 1
+Fill $addr+10, 72, 1
+Fill $addr+11, 00, 17  //0x17 == 23
+
+//------------------PATCH 4 to patch registration name to "Revo User" on the heap in peb ------------------
+//-- although there are about 3 results, we no need loop because patching the first one seems enough
+patch4:
+findallmem $pebaddr, "55 00 6E 00 72 00 65 00 67 00 69 00 73 00 74 00 65 00 72 00 65 00 64 00 20 00 56 00 65 00 72 00 73 00 69 00 6F 00 6E 00"
+log "result: {$result}"
+cmp $result, 1
+jl patch5
+$addr = ref.addr(0)
+log "{$addr}"
+//--52 00 65 00 76 00 6F 00 20 00 55 00 73 00 65 00 72 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Fill $addr,   52, 1
+Fill $addr+1, 00, 1
+Fill $addr+2, 65, 1
+Fill $addr+3, 00, 1
+Fill $addr+4, 76, 1
+Fill $addr+5, 00, 1
+Fill $addr+6, 6F, 1
+Fill $addr+7, 00, 1
+Fill $addr+8, 20, 1
+Fill $addr+9, 00, 1
+Fill $addr+A, 55, 1
+Fill $addr+B, 00, 1
+Fill $addr+C, 73, 1
+Fill $addr+D, 00, 1
+Fill $addr+E, 65, 1
+Fill $addr+F, 00, 1
+Fill $addr+10, 72, 1
+Fill $addr+11, 00, 17  //0x17 == 23
+
+
+//------------- PATCH 5 to patch "Remaining Days" on the heap in peb -----------------
+//-- we need a loop because there are about 3 results
+patch5:
+findallmem $pebaddr, "52 00 65 00 6D 00 61 00 69 00 6E 00 69 00 6E 00 67 00 20 00 44 00 61 00 79 00 73 00 3A 00"
+log "result: {$result}"
+cmp $result, 1
+jl exitscript
+
+// Loop through all found results
+$index = 0
+loop_start:
+cmp $index, $result
+jge end_loop
+
+$addr = ref.addr($index)
+log "Patching at address: {$addr}"
+
+//--just null out the string "Remaining Days:"
+Fill $addr, 00, 1E //0x1E == 30
+
+inc $index
+jmp loop_start
+
+end_loop:
+log "All patches for Patch 5 applied."
+
+ret
+
+exitscript:
+    log "End of Script"

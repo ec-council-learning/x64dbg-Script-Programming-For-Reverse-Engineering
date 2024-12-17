@@ -1,0 +1,44 @@
+; use with CrackMe13-packed.exe by crackinglessons.com
+
+; first, clear all breakpoints
+cls  //clear log
+bpc
+bphwc
+
+; set hardware breakpoint on ESP
+sto
+bphws esp, rw
+
+;--- ANTI-DEBUG: bypass Anti-Debug ---
+bp IsDebuggerPresent
+run
+rtu //run to user code
+sto
+log "" //go to newline in log
+log "[ebp-54]: {[ebp-54]}"
+mov [ebp-54],0
+log "[ebp-54]: {[ebp-54]}"
+
+run
+
+loop:
+    ; check if instruction is a jump
+    cmp dis.isbranch(eip), 1
+    je branchProc
+    sto
+    zzz .100 //sleep 100 ms
+    jmp loop
+
+branchProc:
+    ; check the distance
+    $instructDistance = eip - dis.branchdest(eip) 
+	cmp $instructDistance, 0x400000
+    ja foundOep
+    sto
+    jmp loop
+
+foundOep:
+    sto
+    msg "FOUND OEP"
+    ;savedata "dump.exe", 00400000,10000
+    StartScylla

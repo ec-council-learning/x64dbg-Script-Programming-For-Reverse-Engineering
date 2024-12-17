@@ -1,0 +1,39 @@
+// used on Ser-Me.exe to enable a disabled button
+
+ClearLog
+bpc
+
+//---Get base address of main module for aob scan ---
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+//-- [1] Enable greyed-out button ---
+//--First we set bp
+$count_bp_hits = 0
+findallmem $baseaddr, "E8 5B 4C FD FF A1 10 A9 45 00 50 0F B7 05 9E CB 45 00"
+log "result: {$result}"
+cmp $result, 1
+jl error_message
+$addr = ref.addr(0)
+log "{$addr}"
+bp $addr
+
+
+//--Then we count how many times the bp on SetWindowLongA was hit
+loop_bp:
+run
+inc $count_bp_hits
+log "$count_bp_hits: {$count_bp_hits}"
+cmp $count_bp_hits, 6
+je patch_params
+jmp loop_bp
+
+patch_params:
+mov [esp+4], FFFFFFF0
+mov [esp+8], 54010000
+bpc
+run
+ret 
+
+error_message:
+log "error, aob not found"

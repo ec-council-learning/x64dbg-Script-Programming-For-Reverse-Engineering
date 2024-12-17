@@ -1,0 +1,66 @@
+// 023-foxit phantom pdf (32 bit)
+
+ClearLog
+bpc
+
+//starting addr to aob scan:   00341000
+
+
+
+//--FIRST PATCH AT 01BC3755 --
+findallmem 0x00341000, "0F 84 94 00 00 00 51 89 65 E0 8B CC 6A FF"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, 90, 6
+
+//--2ND PATCH AT 01BC37B9 --
+findallmem 0x00341000, "74 25 C7 45 FC FF FF FF FF 8D 4D F0 E8 C6 F6 9B 00 33 C0"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, EB, 1
+
+//--3RD PATCH AT 01BC39AA --
+                      //74 0D 68 8C 11 10 05 8D 4D E4 E8 97 F5 9B 00
+                      //74 0D 68 8C 11 F3 04 8D 4D E4 E8 97 F5 9B 00
+findallmem 0x00871000, "74 0D 68 ?? ?? ?? ?? 8D 4D E4 E8 97 F5 9B 00"                                      
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, 90, 2
+
+
+//--4th PATCH AT DUMP 0741D8C2 --
+findallmem 0x00871000, "45 00 76 00 61 00 6C 00 75 00 61 00 74 00 69 00 6F 00 6E 00 20 00 75 00 73 00 65 00 72 00"                      
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+
+//Patch with: 54 00 65 00 73 00 74 00 65 00 72 00 20 00 20 00 20 00 20 00 20 00 20 00 20 00 20 00 20 00
+Fill $addr, 54, 1
+Fill $addr+1, 00, 1
+Fill $addr+2, 65, 1
+Fill $addr+3, 00, 1
+Fill $addr+4, 73, 1
+Fill $addr+5, 00, 1
+Fill $addr+6, 74, 1
+Fill $addr+7, 00, 1
+Fill $addr+8, 65, 1
+Fill $addr+9, 00, 1
+Fill $addr+A, 72, 1
+Fill $addr+B, 00, 1
+Fill $addr+C, 00, 18 //use 00 instead of 20 (space)
+
+ret
+
+exitscript:
+    log "AOB not found result: {$result}"

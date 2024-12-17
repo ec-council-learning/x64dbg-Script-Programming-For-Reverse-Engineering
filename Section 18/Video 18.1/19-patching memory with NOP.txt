@@ -1,0 +1,21 @@
+ClearLog
+bpc
+
+//---Get base address of main module for aob scan ---
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+//--- AOB (Array of Bytes) scan ---
+findallmem $baseaddr, "75 20 48 8D 05 4B FA 00 00 48 89 C1 E8 64 FF FF FF"
+log "result: {$result}"
+cmp $result, 1
+jl errorexit
+$addr = ref.addr(0)
+log "{$addr}"
+
+//---Patch $addr with 2 NOPs
+mov $addr, #90 90#
+ret
+
+errorexit:
+log "error, aob not found"

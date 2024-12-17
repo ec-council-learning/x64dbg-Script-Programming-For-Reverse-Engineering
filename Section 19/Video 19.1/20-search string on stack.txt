@@ -1,0 +1,45 @@
+// used to search for strings pushed to the stack
+
+ClearLog
+bpc
+
+//---Get base address of main module for aob scan ---
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+//--- set bp ---
+findallmem $baseaddr, "55 48 89 E5 48 83 EC 30 E8 31 01 00 00"
+log "result: {$result}"
+cmp $result, 1
+jl error_setbp
+$addr = ref.addr(0)
+log "setting bp at: {$addr}"
+bp $addr
+run
+
+
+//---- search for a string on the stack ----
+loop:
+$res = 0
+sti
+$addr =  [rsp]
+log "searching str at {$addr}"
+$res = strstr(utf8($addr), "this")
+log "search result: {$res}"
+cmp $res, 1
+je str_found
+jmp loop
+ret
+
+error_setbp:
+log "UNABLE to set bp"
+ret
+
+str_found:
+log "FOUND at {$addr}"
+pause
+
+
+
+
+

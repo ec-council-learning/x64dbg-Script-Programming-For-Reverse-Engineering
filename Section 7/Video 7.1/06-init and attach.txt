@@ -1,0 +1,11 @@
+//---- init and stop ----
+init "C:\Users\iltfr\Desktop\Crackmes\01-easiest crackme\easiest_crackme.exe"
+log {$pid}
+stop
+ret
+
+
+//----- attach and detach-----
+$mypid = 1144
+attach $mypid
+detach

@@ -1,0 +1,10 @@
+ClearLog
+bpc
+bp 00007FF75CEE26A0
+run   // hits bp
+sti   // step over bp
+InstrUndo  // goes back to bp
+sti        // step into the bp
+sti 2      // steps over bp cannnot undo this
+sti        // can undo this
+InstrUndo

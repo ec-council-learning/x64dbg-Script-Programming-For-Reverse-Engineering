@@ -1,0 +1,14 @@
+// simple-crackme
+
+bpc
+$startaddress = 0x0040226B
+$stopaddress = 0x0040227B
+
+loop:
+    bp $startaddress  
+    $startaddress = $startaddress + dis.len($startaddress)
+    cmp $startaddress, $stopaddress
+    jb loop
+    
+
+log "done. . ."

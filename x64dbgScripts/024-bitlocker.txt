@@ -1,0 +1,40 @@
+// 024-bitlocker anywhere (64-bit)
+// dynamically fetches base address of main module
+// useful for bypassing ALSR
+
+ClearLog
+//bpc
+
+//Get base address of main module for aob scan
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+
+//--PATCH 1: 00007FF68380A7FA TO ENABLE TRIAL --
+findallmem $baseaddr, "74 49 FF 15 2E 7F 10 00"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, EB, 1
+
+
+//--PATCH 2: 00007FF7931971C0 FOR PRO LICENSE --
+findallmem $baseaddr, "8B 05 16 B8 E7 00 C3"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+//B8 02 00 00 00 90
+Fill $addr, B8, 1
+Fill $addr+1, 02, 1
+Fill $addr+2, 00, 3
+Fill $addr+5, 90, 1
+
+
+ret
+
+exitscript:
+    log "AOB not found result: {$result}"

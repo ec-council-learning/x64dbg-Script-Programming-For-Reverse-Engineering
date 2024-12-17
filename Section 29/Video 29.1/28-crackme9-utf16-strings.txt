@@ -1,0 +1,103 @@
+//-- used on CrackMe9 (strings are unicode utf16)
+//-- [1] Scanning memory for Input Str
+//-- [2] to search input str on the stack as parameter to function call 
+//-- [3] to search input str in the EAX register
+
+//-- by crackinglessons.com ---
+
+ClearLog
+
+//--- [1] Scan memory for input str ---
+//---Get base address of main module
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+//---Find input string
+findallmem $baseaddr, "33 00 31 00 33 00 33 00 37 00" //'31337' (utf16 - in unicode)
+log "result: {$result}"
+cmp $result, 1
+jl notfound_exit
+$addr = ref.addr(0)
+log "{$addr}"
+bpc
+ret
+
+notfound_exit:
+log "not found"
+ret
+
+//---- [2] search the top of the stack for utf16 input string ----
+$count_system = 0
+$count_sti = 0
+
+loop:
+$res = 0
+sti
+inc $count_sti
+log "$count_sti: {$count_sti}"
+$module_type = mod.party(eip)  
+log "current addr: {eip}, type: {$module_type}"
+cmp $module_type, 1
+je run_to_user
+
+$esp_value =  [esp]
+log "searching str at {$esp_value}"
+$res = strstr(utf16($esp_value), "31337") //--replace with the str you entered - change to utf8 if necessary
+log "search result: {$res}"
+cmp $res, 1
+je str_found
+jmp loop
+ret
+
+run_to_user:
+inc $count_system
+log "$count_system: {$count_system}"
+rtu 
+jmp loop
+ret
+
+str_found:
+log "FOUND"
+pause
+ret
+
+
+//--THIS WORKS for CrackMe9
+//---- [3] search the register for utf16 input string---
+$count_system = 0
+$count_sti = 0
+
+loop2:
+sti
+inc $count_sti
+log "$count_sti: {$count_sti}"
+$module_type = mod.party(eip)  
+log "current addr: {eip}, type: {$module_type}"
+cmp $module_type, 1
+je run_to_user2
+
+$res = 0
+$eax_value = eax //--extract the eax value
+log "Searching for str at {$eax_value}"
+$res = strstr(utf16($eax_value),"31337") //--replace with the str you entered - change to utf8 if necessary
+cmp $res, 1
+je str_found2
+jmp loop2
+ret
+
+run_to_user2:
+inc $count_system
+log "$count_system: {$count_system}"
+rtu 
+jmp loop2
+ret
+
+str_found2:
+log "FOUND"
+pause
+ret
+
+
+
+
+

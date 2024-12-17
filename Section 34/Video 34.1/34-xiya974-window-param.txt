@@ -1,0 +1,69 @@
+//--34-xiya974-window-param.txt
+//-- used on xiya974 crackme
+//---- [1] put BP after Input prompt
+//---- [2] search param window for utf8 input string ----
+
+//-- by crackinglessons.com ---
+
+ClearLog
+bpc
+
+//--[1] put BP after Input prompt
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+findallmem $baseaddr, "0F 57 C0 0F 11 44 24 20 48 89 7C 24 38 4C 8D 74 24 48 48 8B 6C 24 48" 
+log "result: {$result}"
+cmp $result, 1
+jl notfound_exit
+$addr = ref.addr(0)
+log "{$addr}"
+bp $addr
+run
+
+//---- [2] search param window for utf8 input string ----
+$count_system = 0
+$count_sti = 0
+
+loop:
+$res = 0
+sti
+inc $count_sti
+log "$count_sti: {$count_sti}"
+$module_type = mod.party(rip)  
+log "current addr: {rip}, type: {$module_type}"
+cmp $module_type, 1
+je run_to_user
+
+$rcx_value =  rcx
+log "searching str at {$rcx_value}"
+$res = strstr(utf8($rcx_value), "123456789abcde") //--replace with the str you entered
+log "search result: {$res}"
+cmp $res, 1
+je str_found
+jmp loop
+ret
+
+run_to_user:
+inc $count_system
+log "$count_system: {$count_system}"
+rtu 
+jmp loop
+ret
+
+str_found:
+log "FOUND"
+pause
+ret
+
+notfound_exit:
+log "aob not found"
+
+
+
+
+
+
+
+
+

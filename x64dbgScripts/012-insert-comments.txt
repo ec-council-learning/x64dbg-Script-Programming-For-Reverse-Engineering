@@ -1,0 +1,8 @@
+; use with 64-bit simple-crackme.exe which I personally wrote
+
+cls
+
+bpc
+bp printf
+run
+commentset cip, "PRINTF"

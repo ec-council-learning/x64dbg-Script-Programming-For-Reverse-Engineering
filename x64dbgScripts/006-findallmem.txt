@@ -1,0 +1,29 @@
+ClearLog
+
+; breakpoints clear, breakpoints hardware clear
+bpc
+bphwc
+
+;log "Current Ref Count: {ref.count()}"
+findallmem 0x0000000000401000, "75 0E 48 8D 0D 21 2A 00 00"
+
+; the number of hits of findallmem is stored in $result
+cmp $result, 1
+
+; $result is < 1, meaning no match, then exit
+jl exitscript
+
+; else show how many hits
+log "result: {$result}"
+
+; fetch the 1st address found from References tab
+$addr = ref.addr(0)
+log "address found: {$addr}"
+
+; patch the first two bytes of the found addr with NOPs
+Fill $addr, 90, 1
+Fill $addr + 1, 90, 1
+
+
+exitscript:
+    msg "result: {$result}"

@@ -1,0 +1,5 @@
+//--01-hello.txt
+
+ClearLog
+log "hello world"
+msg "goodbye"

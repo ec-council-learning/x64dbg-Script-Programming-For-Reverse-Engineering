@@ -1,0 +1,7 @@
+ClearLog
+bpc
+bp 7FF742CA15E2
+run
+sto 3
+sti
+sto 2

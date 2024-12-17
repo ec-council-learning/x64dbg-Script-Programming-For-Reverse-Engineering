@@ -1,0 +1,16 @@
+; use with crackme19.exe by crackinglessons.com
+ClearLog
+
+; breakpoints clear, breakpoints hardware clear
+bpc
+bphwc
+
+bp checkSerialNumber
+run
+
+sti
+log {cip}
+log ""
+; code below not working:
+;str.streq(dis.mnemonic(cip), "mov")
+

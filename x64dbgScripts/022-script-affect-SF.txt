@@ -1,0 +1,14 @@
+ClearLog
+bpc
+
+mov cax, 1
+mov cbx, 2
+
+cmp cax,cbx
+je dotask
+
+ret
+
+dotask:
+  call 00401521 //invalid, cannot call an address, can
+                //only call another label

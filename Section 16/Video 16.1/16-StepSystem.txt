@@ -1,0 +1,53 @@
+ClearLog
+bpc
+bp 00007FF7E4EA15F9
+run
+
+jmp no-loop
+//jmp looping
+
+no-loop:
+//---- repeatedly Step until it hits a System call ----
+StepSystem
+rtu
+StepSystem
+rtu
+StepSystem
+rtu
+StepSystem
+rtu
+StepSystem
+rtu
+StepSystem
+rtu
+StepSystem
+
+ret
+
+looping:
+//---- loops ----
+$counter = 1
+
+loop:
+StepSystem
+rtu
+cmp $counter, 6
+je end_loop
+inc $counter
+jmp loop
+
+
+end_loop:
+StepSystem
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,5 @@
+Additional Benefits of Scripting
+
+Apart from those benefits mentioned in the previous lesson, x64dbg scripting can also be used to bypass ASLR (Address Space Layout Randomization) protection. When ASLR is implemented in a program, the base address, heap, and stack are randomized and different each time the program is run. This randomization makes traditional file patching techniques that rely on hardcoded addresses less effective, as the addresses will change with each execution.
+
+However, x64dbg scripting allows you to detect and adapt to the dynamically assigned base address and other relevant addresses, such as those in the Process Environment Block (PEB), during runtime. By using scripting to locate these addresses dynamically, you can adjust your actions (e.g., setting breakpoints, modifying memory) accordingly, effectively working around the randomization introduced by ASLR.

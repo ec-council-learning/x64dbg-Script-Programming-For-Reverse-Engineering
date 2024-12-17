@@ -1,0 +1,12 @@
+ClearLog
+bpc
+
+mov eax,0x7FFFFFFF
+add eax, 1
+
+log "eax is: {eax}"
+
+ret
+
+
+

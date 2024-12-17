@@ -1,0 +1,20 @@
+//--- sesto ---
+ClearLog
+bpc
+bp 00007FF724C615E2
+run
+sesto 3
+bp 00007FF724C615FE
+run
+sto 2
+ret
+
+//--- sesti ---
+ClearLog
+bpc
+bp 00007FF724C615E2
+run
+sesti 3
+bp 00007FF724C615FE
+run 
+sto 2

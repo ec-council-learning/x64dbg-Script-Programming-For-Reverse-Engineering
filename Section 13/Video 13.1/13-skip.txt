@@ -1,0 +1,16 @@
+
+//--- skip ---
+ClearLog
+bpc
+bp 00007FF6DB4015E2
+run
+skip
+sto
+
+//--- skip n ----
+ClearLog
+bpc
+bp 00007FF6DB4015E2
+run
+skip 2
+sto

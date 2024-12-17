@@ -1,0 +1,23 @@
+ClearLog
+bpc
+
+sto
+// set hardware breakpoint on ESP
+bphws esp, rw
+run
+run
+
+counter = 0
+loop:
+  counter = counter + 1
+  log "counter: {counter}"
+  cmp dis.isbranch(eip), 1
+  je message
+  sto
+  cmp counter, 5
+  jb loop
+  
+log "exited loop"
+
+message:
+  log "found a jump"

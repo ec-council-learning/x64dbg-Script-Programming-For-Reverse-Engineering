@@ -1,0 +1,21 @@
+// 019-wicreset
+
+ClearLog
+bpc
+
+//starting addr to aob scan:   00950000
+
+//--first patch --
+findallmem 0x00950000, "75 45 68 F4 01 00 00"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, EB, 1
+
+run
+ret
+
+exitscript:
+    log "result: {$result}"

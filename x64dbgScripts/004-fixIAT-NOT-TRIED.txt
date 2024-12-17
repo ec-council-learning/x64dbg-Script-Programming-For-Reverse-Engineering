@@ -1,0 +1,34 @@
+
+			; from https://www.youtube.com/watch?v=clegXa3avZc
+			; vietnamese (albert johnson)
+			; Introduction to x64dbg scripting 5
+
+			$startAddr = 0x00406160
+			loop:
+				$startAddr = $startAddr + 4
+				cmp $startAddr, 0x406174
+				je finished
+				cmp $startAddr, 0x4060A4
+				je continue
+				cmp $startAddr, 0x4060B4
+				je continue		
+				cmp $startAddr, 0x406040
+				je skipCrashDown
+				mov eip, [$startAddr]			
+				call findAPIAddr
+				sto
+				; this writes the actual address of the API to the memory
+				mov [$startAddr], eax
+				jmp loop
+			findAPIAddr:
+				sto
+				cmp dword(eip), 0x855453FF
+				jne findAPIAddr
+				ret
+			continue:
+				jmp loop
+			skipCrashDown:
+				mov [$startAddr], 0x0
+				jmp loop
+			finished:
+				msg "IAT Repaired"

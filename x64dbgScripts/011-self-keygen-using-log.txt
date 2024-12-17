@@ -1,0 +1,31 @@
+ClearLog
+; use with crackme14 by crackinglessons.com
+; create self-keygen
+
+; breakpoints clear, breakpoints hardware clear
+bpc
+bphwc
+
+;log "Current Ref Count: {ref.count()}"
+findallmem 0x0000000000401000, "C7 04 24 E0 91 71 00 E8 CB 22 30 00"
+
+; the number of hits of findallmem is stored in $result
+cmp $result, 1
+
+; $result is < 1, meaning no match, then exit
+jl exitscript
+
+; else show how many hits
+log "result: {$result}"
+
+; fetch the 1st address found from References tab
+$addr = ref.addr(0)
+log "address found: {$addr}"
+
+log ""
+log "Serial Key: {s:7191E0}"
+
+ret
+
+exitscript:
+    msg "result: {$result}"

@@ -1,0 +1,26 @@
+//--40-themida-autogenserial.txt
+//-- run the crackme to let themida unpack itself into memory
+//-- pause the xdbg debugger using a handle-proc, run the script
+//-- enter any username and serial, click check
+
+ClearLog
+bpc
+
+//---Get base address of main module for aob scan ---
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+//--- AOB (Array of Bytes) scan ---
+findallmem $baseaddr, "74 1A C7 45 A4 FF FF FF FF C7 04 24 10 00 00 00 BA 0E 92 71 00 B9 30 92 71 00"
+log "result: {$result}"
+cmp $result, 1
+jl errorexit
+$addr = ref.addr(0)
+log "{$addr}"
+
+//---Patch $addr with JMP
+mov $addr, #EB#
+ret
+
+errorexit:
+log "error, aob not found"

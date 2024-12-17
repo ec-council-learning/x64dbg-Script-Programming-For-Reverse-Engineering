@@ -1,0 +1,68 @@
+// 017-encdatavault-2
+// Use with encdatavault with UPX
+// It will Put breakpoint on VirtualProtect to let it unpack then do 
+// 3 patches to memory
+// Register with your email and name, it will create config.dat and keychain.dat in
+// C:\Users\username\AppData\Local\Enc Security BV\ENCDataVault70\ENCDataVault Settings\
+//
+// after activation/registration, use script 018-encdatavault-3 to run
+
+//starting addr to aob scan:   0047CB00
+
+ClearLog
+bpc
+
+bp VirtualProtect
+run
+rtu
+bpc
+
+//starting addr to aob scan:   0047CB00
+
+//--first patch --
+findallmem 0x00401000, "75 62 68 41 03 00 00"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, EB, 1
+
+//-- second patch --
+findallmem 0x00401000, "0F 85 9F 01 00 00 6A FF"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+//Replace with: E9 A0 01 00 00 90
+Fill $addr, E9, 1
+Fill $addr+1, A0, 1
+Fill $addr+2, 01, 1
+Fill $addr+3, 00, 1
+Fill $addr+4, 00, 1
+Fill $addr+5, 90, 1
+
+//-- third patch --
+findallmem 0x00401000, "0F 84 A2 00 00 00 6A FF"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+//Replace with: E9 A3 00 00 00 90
+Fill $addr, E9, 1
+Fill $addr+1, A3, 1
+Fill $addr+2, 00, 3
+Fill $addr+5, 90, 1
+
+// cracking license period has ended msg
+bpc
+bp 0047DD44
+run
+
+
+ret
+
+exitscript:
+    log "result: {$result}"

@@ -1,0 +1,45 @@
+//-- 32-patchme2-nags-exit-v2, used on Patchme2-Revamped
+//-- find the addr where nag shows, patch to call exit function
+//-- use ?? wildcards as placeholder for dynamic addresses in aob
+//-- by crackinglessons.com ---
+
+ClearLog
+bpc
+
+//-- find the nag called 'Nag Removal Attempt'
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+//--aob for 'Nag Removal Attempt' - careful to replace dynamic addr with ??
+findallmem $baseaddr, "6A 00 FF 95 04 FE FF FF 68 ?? ?? ?? ?? BB" 
+log "result: {$result}"
+cmp $result, 1
+jl errorexit
+$addr = ref.addr(0)
+log "{$addr}"
+
+bp $addr
+
+//--find the exit function - careful to replace dynamic addr with ??
+findallmem $baseaddr, "75 37 50 FF 15 ?? ?? ?? ?? 8B 45 EC" 
+log "result: {$result}"
+cmp $result, 1
+jl errorexit
+$addr = ref.addr(0)
+log "{$addr}"
+
+run   // to hit our nag bp
+
+//--set eip to the addr of exit function
+eip = $addr + 3 //--because the call is 3 bytes later
+push 0   //-- set first param to 0 for exit function
+
+run
+ret 
+
+errorexit:
+log "error"
+
+
+
+

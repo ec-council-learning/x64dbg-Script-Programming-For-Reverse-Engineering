@@ -1,0 +1,51 @@
+//-- 026-asctimetables (32-bit)
+
+ClearLog
+bpc
+
+//Get base address of main module for aob scan
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+
+//--PATCH 1: 0049E261 --
+findallmem $baseaddr, "0F 85 91 02 3B 00 6A 09"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, 90, 6
+
+//--PATCH 2: 0049E273 --
+findallmem $baseaddr, "0F 85 7F 02 3B 00 6A 0E"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, 90, 6
+
+//--PATCH 3: 0049E285 --
+findallmem $baseaddr, "0F 85 6D 02 3B 00 8B 45 08"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, 90, 6
+
+//--PATCH 4: 0049D868 --
+findallmem $baseaddr, "0F 84 BE 48 3B 00 8B 4D E8"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, 90, 6
+
+
+ret
+
+exitscript:
+    log "AOB not found result: {$result}"

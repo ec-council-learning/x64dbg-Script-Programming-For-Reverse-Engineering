@@ -1,0 +1,6 @@
+ClearLog
+
+msg "Starting script"
+log "log mesage"
+log {cax}
+msg "cax is: {cax}"

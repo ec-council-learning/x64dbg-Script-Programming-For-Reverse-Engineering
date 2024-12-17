@@ -1,0 +1,7 @@
+ClearLog
+bpc
+bp putc
+run   // hits bp
+sti
+StepUser  //Step To User Code
+//rtu     //Run To User Code

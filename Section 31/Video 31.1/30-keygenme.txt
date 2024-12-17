@@ -1,0 +1,131 @@
+//-- used on keygenme
+//-- [1] Scanning memory for Input Str
+//-- [2] to search input str on the stack as parameter to function call 
+//-- [3] to search input str in the EAX register
+//-- [4] Keygen 
+
+//-- by crackinglessons.com ---
+
+ClearLog
+
+//--- [1] Scan memory for input str ---
+//---Get base address of main module
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+//---Find input string
+findallmem $baseaddr, "33 31 33 33 37" //'31337' 
+log "result: {$result}"
+cmp $result, 1
+jl notfound_exit
+$addr = ref.addr(0)
+log "{$addr}"
+bpc
+ret
+
+notfound_exit:
+log "not found"
+ret
+
+//---- [2] search the top of the stack for utf8 input string ----
+$count_system = 0
+$count_sti = 0
+
+loop:
+$res = 0
+sti
+inc $count_sti
+log "$count_sti: {$count_sti}"
+$module_type = mod.party(eip)  
+log "current addr: {eip}, type: {$module_type}"
+cmp $module_type, 1
+je run_to_user
+
+$esp_value =  [esp]
+log "searching str at {$esp_value}"
+$res = strstr(utf8($esp_value), "31337") //--replace with the str you entered
+log "search result: {$res}"
+cmp $res, 1
+je str_found
+jmp loop
+ret
+
+run_to_user:
+inc $count_system
+log "$count_system: {$count_system}"
+rtu 
+jmp loop
+ret
+
+str_found:
+log "FOUND"
+pause
+ret
+
+
+//---- [3] search the register for utf8 input string---
+$count_system = 0
+$count_sti = 0
+
+loop2:
+sti
+inc $count_sti
+log "$count_sti: {$count_sti}"
+$module_type = mod.party(eip)  
+log "current addr: {eip}, type: {$module_type}"
+cmp $module_type, 1
+je run_to_user2
+
+$res = 0
+$eax_value = eax //--extract the eax value
+log "Searching for str at {$eax_value}"
+$res = strstr(utf8($eax_value),"31337") //--replace with the str you entered - change to utf8 if necessary
+cmp $res, 1
+je str_found2
+jmp loop2
+ret
+
+run_to_user2:
+inc $count_system
+log "$count_system: {$count_system}"
+rtu 
+jmp loop2
+ret
+
+str_found2:
+log "FOUND"
+pause
+ret
+
+
+//---- [4] Keygen (Serial shows in script log output)----
+//---Get base address of main module
+bpc
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+//--- Put BP at identified instruction where real Serial appears
+//--where EAX is input str & ECX real Serial:
+findallmem $baseaddr, "8A 10 3A 11 75 1A 84 D2 74 12 8A 50 01 3A 51 01 75 0E 83 C0 02 83 C1 02 84 D2 75 E4 33 C0 EB 05 1B C0 83 D8 FF 85 C0 75 12 50 68 00 42 40 00" 
+log "result: {$result}"
+cmp $result, 1
+jl exit_notfound
+$addr = ref.addr(0)
+log "{$addr}"
+bp $addr
+run
+//run
+$addr_in_ecx = ecx
+log "Serial is:"
+log "{utf8($addr_in_ecx)}" //--CORRECT WAY TO PRINT OUT UTF8
+ret
+
+exit_notfound:
+log "Not found"
+ret
+
+
+
+
+
+

@@ -1,0 +1,111 @@
+//-- 37-flcksr-search-good-msg.txt
+//-- Put MessageBP on Button Check then run script 1 to find Critical Region
+//---- [1] search param window & other regs for good messsage ----
+//---- [2] -- patch with NOP to show good message
+//-- by crackinglessons.com ---
+
+
+ClearLog
+bpc
+
+
+//---- [1] search param window & other regs for good messsage ----
+bpc
+$count_system = 0
+$count_sti = 0
+
+loop:
+$res = 0
+sti
+inc $count_sti
+log "$count_sti: {$count_sti}"
+$module_type = mod.party(rip)  
+log "current addr: {rip}, type: {$module_type}"
+cmp $module_type, 1
+je run_to_user
+
+
+//-------- Scan for utf16, check param window first--------
+$res = strstr(utf16(rcx), "The key is valid") 
+cmp $res, 1
+je str_found
+
+$res = strstr(utf16(rdx), "The key is valid") 
+cmp $res, 1
+je str_found
+
+$res = strstr(utf16(r8), "The key is valid")   
+cmp $res, 1
+je str_found
+
+$res = strstr(utf16(r9), "The key is valid")  
+cmp $res, 1
+je str_found
+
+//---------- for utf16, check other regs ----------
+$res = strstr(utf16(rax), "The key is valid")  
+cmp $res, 1
+je str_found
+
+$res = strstr(utf16(rbx), "The key is valid")    
+cmp $res, 1
+je str_found
+
+$res = strstr(utf16(rsi), "The key is valid")   
+cmp $res, 1
+je str_found
+
+$res = strstr(utf16(rdi), "The key is valid")  
+cmp $res, 1
+je str_found
+
+
+jmp loop
+ret
+
+run_to_user:
+inc $count_system
+log "$count_system: {$count_system}"
+rtu 
+jmp loop
+ret
+
+str_found:
+log "FOUND"
+pause
+ret
+
+
+[2] -- patch with NOP to show good message
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+findallmem $baseaddr, "0F 84 E6 00 00 00 0F 57 C0 0F 11 44 24 78 49 8B CF 48 89 4D 88" 
+log "result: {$result}"
+cmp $result, 1
+jl errorexit
+$addr = ref.addr(0)
+log "{$addr}"" 
+log "result: {$result}"
+cmp $result, 1
+jl errorexit
+$addr = ref.addr(0)
+log "{$addr}"
+mov $addr, #90 90 90 90 90 90#
+ret
+
+errorexit:
+log "aob not found"
+
+
+
+
+
+
+
+
+
+
+
+
+

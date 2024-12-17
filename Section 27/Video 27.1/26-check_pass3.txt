@@ -1,0 +1,99 @@
+//-- used on 06-check_pass3 crackme
+//-- using strstr (search substring) instead of streq (search equal) because input str has appended '\n' (a peculiarity of this crackme)
+//-- [1] to search input str on the stack as parameter to function call 
+//-- [2] to search input str in the EAX register
+//-- [3] Patching with NOP to reverse jump logic
+//-- by crackinglessons.com ---
+
+ClearLog
+
+//---- [1] search the top of the stack for input string ----
+$count_system = 0
+$count_sti = 0
+
+loop:
+$res = 0
+sti
+inc $count_sti
+log "$count_sti: {$count_sti}"
+$module_type = mod.party(eip)  
+log "current addr: {eip}, type: {$module_type}"
+cmp $module_type, 1
+je run_to_user
+
+$esp_value =  [esp]
+log "searching str at {$esp_value}"
+$res = strstr(utf8($esp_value), "crackinglessons") //--using strstr (search substring) instead of streq (search equal)
+log "search result: {$res}"
+cmp $res, 1
+je str_found
+jmp loop
+ret
+
+run_to_user:
+inc $count_system
+log "$count_system: {$count_system}"
+rtu 
+jmp loop
+ret
+
+str_found:
+log "FOUND"
+pause
+ret
+
+
+//---- [2] search the register for input string ---
+$count_system = 0
+$count_sti = 0
+
+loop2:
+sti
+inc $count_sti
+log "$count_sti: {$count_sti}"
+$module_type = mod.party(eip)  
+log "current addr: {eip}, type: {$module_type}"
+cmp $module_type, 1
+je run_to_user2
+
+$res = 0
+$eax_value = eax //--extract the eax value
+log "Searching for str at {$eax_value}"
+$res = strstr(utf8($eax_value),"crackinglessons") //--using strstr (search substring) instead of streq (search equal)
+cmp $res, 1
+je str_found2
+jmp loop2
+ret
+
+run_to_user2:
+inc $count_system
+log "$count_system: {$count_system}"
+rtu 
+jmp loop2
+ret
+
+str_found2:
+log "FOUND"
+pause
+ret
+
+
+//--- [3] Patching with NOP to reverse jump logic ---
+//---Get base address of main module for aob scan
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+//---Patch the jump
+findallmem $baseaddr, "75 0E C7 04 24 64 50 40 00 E8 C9 29 00 00 EB 0C"
+log "result: {$result}"
+cmp $result, 1
+jl errorexit
+$addr = ref.addr(0)
+log "{$addr}"
+
+//---Patch $addr with 2 NOPs
+mov $addr, #90 90#
+ret
+
+errorexit:
+log "error, aob not found"

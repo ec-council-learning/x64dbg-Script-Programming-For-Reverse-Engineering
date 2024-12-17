@@ -1,0 +1,16 @@
+ClearLog
+bpc
+
+// Get base address of main module
+main_base = mod.main()
+log "main: {main_base}"
+
+// Get the base address of user32.dll
+user32_base = mod.fromname("user32.dll")
+
+log "user32_base: {user32_base}"
+
+ 
+
+ret
+

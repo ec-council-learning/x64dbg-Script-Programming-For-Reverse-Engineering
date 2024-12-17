@@ -1,0 +1,41 @@
+// Use with CrackMe11-packed with UPX
+// It will Put breakpoint on VirtualProtect to let it unpack
+// then AOB scan for a je and assemble it to jmp
+// then any key will give good message
+
+ClearLog
+bpc
+
+bp VirtualProtect
+run
+rtu
+bpc
+
+// at addr 0x00403A59
+//AOB: 74 22 C7 45 BC 04 00 00 00
+
+findallmem 0x00401000, "74 22 C7 45 BC 04 00 00 00"
+
+// the number of hits of findallmem is stored in $result
+cmp $result, 1
+
+// $result is < 1, meaning no match, then exit
+jl exitscript
+
+// else it found it
+log "result: {$result}"
+i = 0
+
+// print out the address where the AOB was found
+$addr = ref.addr(0)
+log "address found: {$addr}"
+
+// patch the first byte of the found addr with EB
+// for 8 NOPs, do: Fill $addr, 90, 8
+Fill $addr, EB, 1
+run
+
+ret
+
+exitscript:
+    log "result: {$result}"

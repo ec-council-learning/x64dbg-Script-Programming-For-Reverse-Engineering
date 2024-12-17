@@ -1,0 +1,94 @@
+//--36-upx-packed-gui.txt
+//-- used on 17-Crackme11
+//--- [1] Scan memory for input str---
+//--- [2] search the top of the stack for utf16 input string ----
+//--- [3] Patch with JMP to always show good message
+
+//-- by crackinglessons.com ---
+
+ClearLog
+bpc
+
+//--- [1] Scan memory for input str---
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+findallmem $baseaddr, "33 00 31 00 33 00 33 00 37 00" //'31337' 
+log "result: {$result}"
+cmp $result, 1
+jl notfound_exit
+$addr = ref.addr(0)
+log "{$addr}"
+bpc
+ret
+
+notfound_exit:
+log "not found"
+ret
+
+//---- [2] search the top of the stack for utf16 input string ----
+$count_system = 0
+$count_sti = 0
+
+loop:
+$res = 0
+sti
+inc $count_sti
+log "$count_sti: {$count_sti}"
+$module_type = mod.party(eip)  
+log "current addr: {eip}, type: {$module_type}"
+cmp $module_type, 1
+je run_to_user
+
+$esp_value =  [esp]
+log "searching str at {$esp_value}"
+$res = strstr(utf16($esp_value), "31337") //--replace with the str you entered
+log "search result: {$res}"
+cmp $res, 1
+je str_found
+jmp loop
+ret
+
+run_to_user:
+inc $count_system
+log "$count_system: {$count_system}"
+rtu 
+jmp loop
+ret
+
+str_found:
+log "FOUND"
+pause
+ret
+
+
+//--- [3] Patch with JMP to always show good message
+
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+findallmem $baseaddr, "74 22 C7 45 BC 04 00 00 00 C7 04 24 10 00 00 00 BA 5E 82 71 00" 
+log "result: {$result}"
+cmp $result, 1
+jl errorexit
+$addr = ref.addr(0)
+log "{$addr}"
+mov $addr, #EB#
+ret
+
+errorexit:
+log "aob not found"
+
+
+
+
+
+
+
+
+
+
+
+
+
+

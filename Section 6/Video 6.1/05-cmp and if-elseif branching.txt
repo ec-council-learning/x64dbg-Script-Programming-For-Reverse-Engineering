@@ -1,0 +1,21 @@
+
+
+//--------- cmp and if-elseif branching -------------
+cmp rax, rbx
+je message_equal
+jg message_greater
+jl message_lesser
+ret
+
+message_equal:
+log "{rax} == {rbx}"
+ret
+
+message_greater:
+log "{rax} > {rbx}"
+ret
+
+message_lesser:
+log "{rax} < {rbx}"
+
+

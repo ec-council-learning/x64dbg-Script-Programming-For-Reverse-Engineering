@@ -1,0 +1,70 @@
+// used on Ser-Me.exe to enable a disabled button and to patch the bad message 
+// to become good message
+
+ClearLog
+bpc
+
+//---Get base address of main module for aob scan ---
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+//-- [1] Enable greyed-out button ---
+//--First we set bp
+$count_bp_hits = 0
+findallmem $baseaddr, "E8 5B 4C FD FF A1 10 A9 45 00 50 0F B7 05 9E CB 45 00"
+log "result: {$result}"
+cmp $result, 1
+jl error_message
+$addr = ref.addr(0)
+log "{$addr}"
+bp $addr
+
+
+//--Then we count how many times the bp on SetWindowLongA was hit
+loop_bp:
+run
+inc $count_bp_hits
+log "$count_bp_hits: {$count_bp_hits}"
+cmp $count_bp_hits, 6
+je patch_params
+jmp loop_bp
+
+patch_params:
+mov [esp+4], FFFFFFF0
+mov [esp+8], 54010000
+bpc
+
+//---[2] Patch bad message to become good message---
+//---Patch "Error" with "Right" caption
+findallmem $baseaddr, "45 72 72 6F 72 00 00 00 FF FF FF FF 0E 00 00 00 57 72 6F 6E 67 20 53 65 72 69 61 6C 20 21 00 00"
+log "result: {$result}"
+cmp $result, 1
+jl error_message
+$addr = ref.addr(0)
+log "{$addr}"
+mov $addr, #52 69 67 68 74#
+
+
+//---Patch "Wrong Serial" with "Right" text message
+findallmem $baseaddr, "57 72 6F 6E 67 20 53 65 72 69 61 6C 20 21 00 00 FF FF FF FF 20 00 00 00 47 65 74 20 52 69 64 20"
+log "result: {$result}"
+cmp $result, 1
+jl error_message
+$addr = ref.addr(0)
+log "{$addr}"
+mov $addr, #52 69 67 68 74#
+
+//---Patch Error Icon  with Information Icon
+findallmem $baseaddr, "C7 05 5C CC 45 00 10 10 00 00 A1 5C CC 45 00 50 A1 58 CC 45 00"
+log "result: {$result}"
+cmp $result, 1
+jl error_message
+$addr = ref.addr(0)
+log "{$addr}"
+mov $addr, #C7 05 5C CC 45 00 40 00 00 00#
+
+run
+ret
+
+error_message:
+log "error, aob not found"

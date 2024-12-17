@@ -1,0 +1,50 @@
+; --- for unpacking crackme11 ---
+; --- which is packed with UPX packer ---
+
+; first, clear all breakpoints
+bpc
+bphwc
+sto
+
+; set hardware breakpoint on ESP
+bphws esp, rw
+run
+
+loop:
+    ; check if instruction is a jump
+    cmp dis.isbranch(eip), 1
+    je branchProc
+    sto
+    jmp loop
+
+$nextInstructAddr = 0
+branchProc:
+    ; check the distance
+    $instructDistance = eip - dis.branchdest(eip) 
+	cmp $instructDistance, 0x400000
+    ja foundOep
+
+    ; if the app jumps back
+    cmp dis.branchdest(eip), eip
+    jb nextInstruct
+
+    ; if jump forward, we step over
+    sto
+    jmp loop
+
+nextInstruct:
+    ; if the app jumps back
+    $nextInstructAddr = eip + dis.len(eip)
+    bp $nextInstructAddr
+    run
+    bpc
+    jmp loop
+
+foundOep:
+	sto
+	msg "Found OEP at: {eip}"
+
+; clear all breakpoints before exiting
+bpc
+bphwc
+

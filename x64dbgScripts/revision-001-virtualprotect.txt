@@ -1,0 +1,12 @@
+ClearLog
+log "Script starting"
+bc
+
+bp VirtualProtect
+run
+
+bpc VirtualProtect
+log "New protection is: {[esp + C ]}"
+rtr  //run to ret
+sestep //swallow exception and continue stepping
+rtu //run to user code

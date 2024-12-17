@@ -1,0 +1,33 @@
+;use with CrackMe12.exe by crackinglessons.com
+;bypass IsDebuggerPresent by patching jne to jmp
+
+
+cls  //clear log
+bpc  
+
+bp IsDebuggerPresent
+run
+rtu //run to user code
+
+
+findallmem 0x0000000000401000, "74 3A A1 00 56 72 00"
+
+; the number of hits of findallmem is stored in $result
+cmp $result, 1
+
+; $result is < 1, meaning no match, then exit
+jl notfound
+
+; fetch the 1st address found from References tab
+$addr = ref.addr(0)
+log "address found: {$addr}"
+
+; patch the first byte of the found addr with EB
+Fill $addr, EB, 1
+
+run
+ret
+
+notfound:
+    log "pattern not found
+    

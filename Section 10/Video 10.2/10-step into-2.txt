@@ -1,0 +1,6 @@
+ClearLog
+bpc
+bp 7FF742CA15E2
+run
+sti 5
+//sti C  //should reach 1592

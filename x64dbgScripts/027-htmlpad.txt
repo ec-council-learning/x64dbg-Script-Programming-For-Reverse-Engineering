@@ -1,0 +1,35 @@
+//-- 027-htmlpad (32-bit)
+//-- it also bypasses CRC check on the file
+//-- because anti-tampering only works on files not memory.
+
+ClearLog
+//bpc
+
+//Get base address of main module for aob scan
+$baseaddr = mod.main()
+log "baseaddr: {$baseaddr}"
+
+
+//--PATCH 1: 00A5E8D5 --
+findallmem $baseaddr, "74 12 8B 5D FC 8B 55 FC 8B 83 C4 00 00 00 FF 93 C0 00 00 00 33 C0"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, EB, 1
+
+
+//--PATCH 2: 01EF8D01 --
+findallmem $baseaddr, "75 55 68 B8 8E EF 01 6A 00 6A 00"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, EB, 1
+
+ret
+
+exitscript:
+    log "AOB not found result: {$result}"

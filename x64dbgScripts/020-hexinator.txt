@@ -1,0 +1,70 @@
+// 020-hexinator (64 bit)
+
+ClearLog
+bpc
+
+//starting addr to aob scan:   00007FF7B9790000
+
+
+
+//--first patch --
+
+findallmem 0x00950000, "7E 08 40 B7 01 E9 3B 04 00 00"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, 90, 2
+
+//--NEW DIFF BUTTON 1ST PATCh--
+findallmem 0x00950000, "74 13 48 8B 05 DD 07 42 00"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, 90, 2
+
+//--NEW DIFF BUTTON 2ND PATCH--
+findallmem 0x00950000, "74 07 B0 01 48 83 C4 38 C3 32 C0 48 83 C4 38 C3 CC CC 48 89 4C 24 08"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, 90, 2
+
+//--NEW GRAMMAR BUTTON 1ST PATCH --
+findallmem 0x00950000, "74 13 48 8B 05 0D 02 42 00"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, 90, 2
+
+
+//--NEW GRAMMAR BUTTON 2ND PATCH --
+findallmem 0x00950000, "74 07 B0 01 48 83 C4 38 C3 32 C0 48 83 C4 38 C3 CC CC 48 83 EC 38 E8 37 7B 00 00 48 8B D0 48 8D 4C 24 20 E8 8A AA 00 00 33 D2 48 8B C8 E8 10 FA FF FF 84 C0 74 13 48 8B 05 CD 01 42 00 80 38 00 74 07 B0 01 48 83 C4 38 C3 32 C0"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, 90, 2
+
+
+//--LICENSE SCREEN PATCH --
+findallmem 0x00950000, "0F 84 CA 00 00 00 48 8B 4B 30"
+cmp $result, 1
+jl exitscript
+log "result: {$result}"
+$addr = ref.addr(0)
+log "{$addr}"
+Fill $addr, 90, 6
+
+ret
+
+exitscript:
+    log "result: {$result}"

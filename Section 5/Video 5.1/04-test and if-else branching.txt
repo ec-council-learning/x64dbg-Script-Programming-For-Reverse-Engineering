@@ -1,0 +1,15 @@
+
+
+//--------- test and if-else branching -------------
+test rax, rax
+je message1
+log "not equal to 0"
+ret
+
+message1:
+log "equal to 0"
+ret
+
+
+
+
